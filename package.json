@@ -1,0 +1,40 @@
+{
+  "name": "saavo-cli",
+  "version": "0.1.0",
+  "description": "Command-line interface for Saavo",
+  "type": "module",
+  "bin": {
+    "saavo": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "build:production": "vite build --mode production",
+    "dev": "vite-node --mode development src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.7.0",
+    "commander": "^15.0.0",
+    "oauth4webapi": "^3.8.6",
+    "open": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.0",
+    "vite-node": "^6.0.0",
+    "vitest": "^4.1.10"
+  }
+}
