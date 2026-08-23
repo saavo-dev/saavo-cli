@@ -23,6 +23,7 @@ export interface LoginOptions {
   openBrowser?: boolean;
   force?: boolean;
   currentUserEndpoint: URL;
+  credentialsPath?: string | undefined;
 }
 
 export interface AuthorizationRequest {
@@ -112,7 +113,7 @@ export async function login(
   options: LoginOptions,
 ): Promise<void> {
   if (!options.force) {
-    const state = await readCredentialState();
+    const state = await readCredentialState(options.credentialsPath);
     const storedAccount = state.store ? activeAccount(state.store) : null;
     const credentials = storedAccount?.credentials ?? state.legacy;
     const requirements = {
@@ -127,7 +128,7 @@ export async function login(
         );
       } else {
         const user = await fetchCurrentUser(options.currentUserEndpoint, credentials);
-        await saveAccount({ user, credentials });
+        await saveAccount({ user, credentials }, options.credentialsPath);
         clack.log.success(`Already logged in as ${user.name} (${user.email}).`);
       }
       clack.log.info('Use `saavo login --force` to authorize again.');
@@ -148,7 +149,10 @@ export async function login(
         }
         const user = storedAccount?.user
           ?? await fetchCurrentUser(options.currentUserEndpoint, refreshedCredentials);
-        await saveAccount({ user, credentials: refreshedCredentials });
+        await saveAccount(
+          { user, credentials: refreshedCredentials },
+          options.credentialsPath,
+        );
         refreshSpinner.stop('Access token refreshed');
         clack.log.success(`Logged in as ${user.name} (${user.email}).`);
         return;
@@ -191,7 +195,7 @@ export async function login(
       requestedScope: config.scopes.join(' '),
     });
     const user = await fetchCurrentUser(options.currentUserEndpoint, credentials);
-    await saveAccount({ user, credentials });
+    await saveAccount({ user, credentials }, options.credentialsPath);
     spinner.stop('Authorization complete');
     clack.log.success(`Logged in as ${user.name} (${user.email}).`);
   } catch (error) {

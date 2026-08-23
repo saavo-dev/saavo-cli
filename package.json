@@ -13,12 +13,12 @@
     "build": "vite build",
     "build:production": "vite build --mode production",
     "dev": "vite-node --mode development src/index.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --dir test",
+    "test:watch": "vitest --dir test",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.13.0"
   },
   "license": "MIT",
   "publishConfig": {
@@ -27,6 +27,8 @@
   "dependencies": {
     "@clack/prompts": "^1.7.0",
     "commander": "^15.0.0",
+    "fflate": "^0.8.3",
+    "jsonc-parser": "^3.3.1",
     "oauth4webapi": "^3.8.6",
     "open": "^11.0.0"
   },

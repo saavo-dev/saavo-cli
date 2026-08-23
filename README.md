@@ -4,7 +4,7 @@ The command-line client for authorizing access and creating projects from Saavo 
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 22.13 or newer
 - An OAuth 2.0 public-client registration whose redirect URI accepts an IPv4 loopback address with a dynamic port, as defined by RFC 8252
 
 ## Development
@@ -193,6 +193,27 @@ After token exchange, `SAAVO_CURRENT_USER_ENDPOINT` must accept the access token
 ```
 
 `data.templates` may be an empty array. All listed release fields are validated before they are displayed.
+
+## Create a project
+
+Create a project in a new or existing empty directory named after the project:
+
+```bash
+saavo create my-project
+saavo create my-project --template saavo-default
+```
+
+Omit the project name to enter it interactively. Project names use lowercase ASCII letters, numbers, and dashes. When an input can be normalized safely, the CLI shows the proposed name and asks for confirmation; an input with no usable ASCII characters is rejected. Unless `--template` is provided, the CLI shows the template selector when two or more templates are available and automatically uses the only template otherwise.
+
+The create flow:
+
+1. **Project name and preflight:** validates or confirms the normalized project name, rejects a file or non-empty target directory before OAuth or API calls, then checks Node.js, npm, Saavo login, and template access. Missing or invalid Saavo credentials automatically enter OAuth authorization.
+2. **Download, extraction, and identity:** selects a template, obtains a short-lived URL, downloads without forwarding the Saavo token, verifies byte size and SHA-256, and safely extracts it inside the project container. Before committing the extracted project, it writes the confirmed project name and initial `0.0.1` version to `package.json` and derives the Worker, D1, R2, and Queue names in `wrangler.jsonc`.
+3. **Local development:** asks whether to prepare the project for local development, defaulting to yes. When accepted, it runs `npm ci` when a lockfile exists (or `npm install` otherwise), then runs the template-owned `npm run saavo:init` command to generate Cloudflare types, create `.env`, generate the local application secret, initialize both local D1 databases, and verify the local configuration. When declined, the next-step message lists every required command.
+
+The CLI does not configure remote Cloudflare resources or initialize Git. Project-specific local setup remains owned by the versioned template through its explicit `saavo:init` contract.
+
+If preflight, download, or extraction fails, generated project content is removed. Once the verified template has been committed to the target, dependency or local initialization failures preserve the project and print the commands needed to resume safely.
 
 ## Protocol guarantees
 

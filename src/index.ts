@@ -4,6 +4,7 @@ import * as clack from '@clack/prompts';
 import { Command } from 'commander';
 import { resolveCurrentUserEndpoint, resolveTemplatesEndpoint } from './api/config.js';
 import { listAccounts, useAccount } from './commands/account.js';
+import { createProject } from './commands/create.js';
 import { logout } from './commands/logout.js';
 import { forceRefresh } from './commands/refresh.js';
 import { listTemplates } from './commands/templates.js';
@@ -25,6 +26,13 @@ interface RefreshCommandOptions extends OAuthConfigInput {
 interface TemplatesCommandOptions extends OAuthConfigInput {
   templatesEndpoint?: string;
   json?: boolean;
+}
+
+interface CreateCommandOptions extends OAuthConfigInput {
+  templatesEndpoint?: string;
+  currentUserEndpoint?: string;
+  template?: string;
+  browser?: boolean;
 }
 
 const program = new Command()
@@ -123,6 +131,33 @@ program
     );
   });
 
+program
+  .command('create [project-name]')
+  .description('Create a project from an available Saavo template')
+  .option('--template <id>', 'template ID (otherwise selected interactively)')
+  .option('--client-id <id>', 'OAuth public client ID')
+  .option('--issuer <url>', 'authorization server issuer URL')
+  .option('--authorization-endpoint <url>', 'OAuth authorization endpoint URL')
+  .option('--token-endpoint <url>', 'OAuth token endpoint URL')
+  .option('--current-user-endpoint <url>', 'protected current-user endpoint URL')
+  .option('--scope <scopes>', 'space-separated OAuth scopes')
+  .option('--templates-endpoint <url>', 'protected templates endpoint URL')
+  .option('--allow-insecure', 'allow HTTP endpoints on loopback hosts during development')
+  .option('--no-browser', 'print an OAuth authorization URL without opening a browser')
+  .action(async (projectName: string | undefined, options: CreateCommandOptions) => {
+    const oauthConfig = resolveOAuthConfig(options);
+    await createProject(
+      oauthConfig,
+      resolveTemplatesEndpoint(options.templatesEndpoint, oauthConfig.allowInsecure),
+      resolveCurrentUserEndpoint(options.currentUserEndpoint, oauthConfig.allowInsecure),
+      projectName,
+      {
+        templateId: options.template,
+        openBrowser: options.browser !== false,
+      },
+    );
+  });
+
 program.action(() => {
   program.help();
 });
@@ -143,7 +178,9 @@ try {
             ? 'saavo logout'
             : process.argv.includes('refresh')
               ? 'saavo refresh'
-              : process.argv.includes('templates') ? 'saavo templates' : 'saavo',
+              : process.argv.includes('templates')
+                ? 'saavo templates'
+                : process.argv.includes('create') ? 'saavo create' : 'saavo',
     );
     clack.log.warn(`Diagnostic details were saved to:\n${logPath}`);
   } catch (logError) {
