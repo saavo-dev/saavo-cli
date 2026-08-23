@@ -12,10 +12,24 @@ const oauthDefaults = {
   templatesEndpoint: 'https://saavo.dev/api/templates',
 };
 
-export default defineConfig(({ mode }) => {
-  const environment = loadEnv(mode, process.cwd(), 'SAAVO_');
+function validateProductionUrl(name: string, value: string): void {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`${name} must be an absolute URL in the production build.`);
+  }
+  if (url.protocol !== 'https:' || url.username || url.password || url.hash) {
+    throw new Error(`${name} must be a credential-free HTTPS URL without a fragment.`);
+  }
+}
+
+export function resolveEmbeddedOAuthConfig(
+  mode: string,
+  environment: Record<string, string>,
+) {
   const embeddedOAuthConfig = {
-    clientId: environment.SAAVO_OAUTH_CLIENT_ID || undefined,
+    clientId: environment.SAAVO_OAUTH_CLIENT_ID?.trim() || undefined,
     issuer: environment.SAAVO_OAUTH_ISSUER || oauthDefaults.issuer,
     authorizationEndpoint:
       environment.SAAVO_OAUTH_AUTHORIZATION_ENDPOINT
@@ -36,13 +50,45 @@ export default defineConfig(({ mode }) => {
       mode === 'development' ? environment.SAAVO_CONFIG_DIR || undefined : undefined,
   };
 
+  if (mode === 'production') {
+    if (!embeddedOAuthConfig.clientId) {
+      throw new Error(
+        'SAAVO_OAUTH_CLIENT_ID is required to build the public Saavo CLI.',
+      );
+    }
+    validateProductionUrl('SAAVO_OAUTH_ISSUER', embeddedOAuthConfig.issuer);
+    validateProductionUrl(
+      'SAAVO_OAUTH_AUTHORIZATION_ENDPOINT',
+      embeddedOAuthConfig.authorizationEndpoint,
+    );
+    validateProductionUrl('SAAVO_OAUTH_TOKEN_ENDPOINT', embeddedOAuthConfig.tokenEndpoint);
+    validateProductionUrl(
+      'SAAVO_CURRENT_USER_ENDPOINT',
+      embeddedOAuthConfig.currentUserEndpoint,
+    );
+    validateProductionUrl(
+      'SAAVO_TEMPLATES_ENDPOINT',
+      embeddedOAuthConfig.templatesEndpoint,
+    );
+    if (!embeddedOAuthConfig.scope.trim()) {
+      throw new Error('SAAVO_OAUTH_SCOPE must contain at least one scope.');
+    }
+  }
+
+  return embeddedOAuthConfig;
+}
+
+export default defineConfig(({ mode }) => {
+  const environment = loadEnv(mode, process.cwd(), 'SAAVO_');
+  const embeddedOAuthConfig = resolveEmbeddedOAuthConfig(mode, environment);
+
   return {
     define: {
       __SAAVO_BUILD_CONFIG__: JSON.stringify(embeddedOAuthConfig),
       __SAAVO_VERSION__: JSON.stringify(packageJson.version),
     },
     build: {
-      target: 'node20',
+      target: 'node22',
       outDir: 'dist',
       emptyOutDir: true,
       sourcemap: true,

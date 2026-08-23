@@ -1,13 +1,36 @@
 # Saavo CLI
 
-The command-line client for authorizing access and creating projects from Saavo templates.
+The official command-line client for authorizing access and creating projects from Saavo templates.
+
+## Quick start
+
+Create and prepare a local Saavo project without installing the CLI globally:
+
+```bash
+npx saavo@latest create my-project
+```
+
+The guided flow signs in to Saavo when necessary, downloads and verifies the selected template, applies the project identity, installs dependencies, and initializes local development. When it completes:
+
+```bash
+cd my-project
+npm run dev
+```
+
+For repeated use, install the CLI globally:
+
+```bash
+npm install --global saavo
+saavo --help
+```
 
 ## Requirements
 
 - Node.js 22.13 or newer
-- An OAuth 2.0 public-client registration whose redirect URI accepts an IPv4 loopback address with a dynamic port, as defined by RFC 8252
 
 ## Development
+
+CLI maintainers need an OAuth 2.0 public-client registration whose redirect URI accepts `http://127.0.0.1:<dynamic-port>/oauth/callback`, as defined by RFC 8252. End users of the published package use the Client ID embedded in the production build.
 
 ```bash
 npm install
@@ -101,7 +124,7 @@ The command calls the protected template catalog with the active account's Beare
 
 | Environment variable | Purpose | Default |
 | --- | --- | --- |
-| `SAAVO_OAUTH_CLIENT_ID` | Registered OAuth public Client ID | Required |
+| `SAAVO_OAUTH_CLIENT_ID` | Registered OAuth public Client ID | Required when developing or building; embedded in the published CLI |
 | `SAAVO_OAUTH_ISSUER` | Authorization server issuer | `https://saavo.dev` |
 | `SAAVO_OAUTH_AUTHORIZATION_ENDPOINT` | Authorization endpoint | `https://saavo.dev/oauth/authorize` |
 | `SAAVO_OAUTH_TOKEN_ENDPOINT` | Token endpoint | `https://saavo.dev/oauth/token` |
@@ -123,6 +146,8 @@ npm run build:production
 ```
 
 Vite automatically loads `.env.production` in production mode and statically embeds the public configuration into `dist/index.js`. The published CLI therefore works without OAuth environment variables. Runtime environment variables and command-line options can still override embedded values for diagnostics. `.env.production` is ignored by Git and is not published.
+
+Production builds fail when `SAAVO_OAUTH_CLIENT_ID` is missing or when an embedded endpoint is not a credential-free HTTPS URL. This prevents publishing a CLI that cannot complete its default login flow.
 
 Never add a Client Secret: this CLI is an OAuth public client and does not support one.
 
@@ -229,8 +254,15 @@ If preflight, download, or extraction fails, generated project content is remove
 ## Checks
 
 ```bash
-npm test
+npm run verify
 npm run test:watch
-npm run typecheck
 npm run build
+npm run smoke:dist
+npm run smoke:package
 ```
+
+`smoke:package` packs the same files intended for npm, installs the tarball into a temporary project, checks the generated `saavo` executable, and verifies its version and help output.
+
+## Publishing
+
+Public releases are built from version tags by GitHub Actions and published as the `saavo` npm package. Maintainer setup, the one-time first publication, Trusted Publisher configuration, and the normal release command sequence are documented in [RELEASING.md](https://github.com/saavo-dev/saavo-cli/blob/master/RELEASING.md).

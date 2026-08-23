@@ -1,0 +1,57 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish saavo
+    runs-on: ubuntu-latest
+    env:
+      SAAVO_OAUTH_CLIENT_ID: ${{ vars.SAAVO_OAUTH_CLIENT_ID }}
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js and npm
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Validate release tag and package versions
+        run: node scripts/validate-release.mjs "${GITHUB_REF_NAME}"
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify source
+        run: npm run verify
+
+      - name: Build production CLI
+        run: npm run build:production
+
+      - name: Verify built entry point
+        run: npm run smoke:dist
+
+      - name: Pack, install, and verify CLI
+        run: npm run smoke:package
+
+      - name: Publish public package
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
