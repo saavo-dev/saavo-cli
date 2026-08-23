@@ -11,32 +11,17 @@ The public npm package is `saavo-cli`, and its executable is `saavo`.
 
 The `repository` value in `package.json` must continue to match the GitHub repository exactly.
 
-## First publication
+## Trusted Publisher
 
-Trusted Publisher settings belong to an existing npm package, so the package name must first be claimed once.
+`saavo-cli` is connected to npm Trusted Publishing with this configuration:
 
-1. Create a short-lived granular npm access token that can publish new public packages and save it as the GitHub Actions secret `NPM_TOKEN`.
-2. Make sure `package.json` and both root version fields in `package-lock.json` are `0.1.0`.
-3. Push the release commit and tag:
+- Provider: GitHub Actions
+- Organization or user: `saavo-dev`
+- Repository: `saavo-cli`
+- Workflow filename: `publish.yml`
+- Allowed action: `npm publish`
 
-   ```bash
-   git tag -a v0.1.0 -m v0.1.0
-   git push origin master
-   git push origin v0.1.0
-   ```
-
-4. Wait for `.github/workflows/publish.yml` to publish `saavo-cli@0.1.0`.
-5. On npmjs.com, open the `saavo-cli` package settings and configure its Trusted Publisher:
-
-   - Provider: GitHub Actions
-   - Organization or user: `saavo-dev`
-   - Repository: `saavo-cli`
-   - Workflow filename: `publish.yml`
-   - Allowed action: `npm publish`
-
-6. Delete the `NPM_TOKEN` GitHub secret and revoke the bootstrap token. Subsequent releases authenticate through GitHub OIDC. The workflow requests npm provenance for both the bootstrap publication and later Trusted Publisher releases.
-
-If the first workflow reports that the name is unavailable, do not rename only the GitHub workflow. Choose a new package name and update `package.json`, `package-lock.json`, README commands, smoke tests, and release validation together.
+The package publishing-access setting requires two-factor authentication and disallows bypass-2FA tokens. Do not add an `NPM_TOKEN` GitHub secret: releases authenticate through GitHub OIDC and receive npm provenance.
 
 ## Normal release
 

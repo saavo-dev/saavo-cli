@@ -265,4 +265,4 @@ npm run smoke:package
 
 ## Publishing
 
-Public releases are built from version tags by GitHub Actions and published as the `saavo-cli` npm package. Maintainer setup, the one-time first publication, Trusted Publisher configuration, and the normal release command sequence are documented in [RELEASING.md](https://github.com/saavo-dev/saavo-cli/blob/master/RELEASING.md).
+Public releases are built from version tags by GitHub Actions and published as the `saavo-cli` npm package through Trusted Publishing. Maintainer setup and the normal release command sequence are documented in [RELEASING.md](https://github.com/saavo-dev/saavo-cli/blob/master/RELEASING.md).
