@@ -1,6 +1,6 @@
 # Publishing Saavo CLI
 
-The public npm package is `saavo`, and its executable is also `saavo`.
+The public npm package is `saavo-cli`, and its executable is `saavo`.
 
 ## Repository prerequisites
 
@@ -25,8 +25,8 @@ Trusted Publisher settings belong to an existing npm package, so the package nam
    git push origin v0.1.0
    ```
 
-4. Wait for `.github/workflows/publish.yml` to publish `saavo@0.1.0`.
-5. On npmjs.com, open the `saavo` package settings and configure its Trusted Publisher:
+4. Wait for `.github/workflows/publish.yml` to publish `saavo-cli@0.1.0`.
+5. On npmjs.com, open the `saavo-cli` package settings and configure its Trusted Publisher:
 
    - Provider: GitHub Actions
    - Organization or user: `saavo-dev`

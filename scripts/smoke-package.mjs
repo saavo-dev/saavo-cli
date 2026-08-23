@@ -85,11 +85,11 @@ try {
     installRoot,
   );
 
-  const installedRoot = join(installRoot, 'node_modules', 'saavo');
+  const installedRoot = join(installRoot, 'node_modules', 'saavo-cli');
   const installedPackage = JSON.parse(
     await readFile(join(installedRoot, 'package.json'), 'utf8'),
   );
-  if (installedPackage.name !== 'saavo') {
+  if (installedPackage.name !== 'saavo-cli') {
     throw new Error(`Installed unexpected package ${installedPackage.name ?? '(missing)'}.`);
   }
 

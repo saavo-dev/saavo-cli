@@ -7,7 +7,7 @@ The official command-line client for authorizing access and creating projects fr
 Create and prepare a local Saavo project without installing the CLI globally:
 
 ```bash
-npx saavo@latest create my-project
+npx saavo-cli@latest create my-project
 ```
 
 The guided flow signs in to Saavo when necessary, downloads and verifies the selected template, applies the project identity, installs dependencies, and initializes local development. When it completes:
@@ -20,7 +20,7 @@ npm run dev
 For repeated use, install the CLI globally:
 
 ```bash
-npm install --global saavo
+npm install --global saavo-cli
 saavo --help
 ```
 
@@ -265,4 +265,4 @@ npm run smoke:package
 
 ## Publishing
 
-Public releases are built from version tags by GitHub Actions and published as the `saavo` npm package. Maintainer setup, the one-time first publication, Trusted Publisher configuration, and the normal release command sequence are documented in [RELEASING.md](https://github.com/saavo-dev/saavo-cli/blob/master/RELEASING.md).
+Public releases are built from version tags by GitHub Actions and published as the `saavo-cli` npm package. Maintainer setup, the one-time first publication, Trusted Publisher configuration, and the normal release command sequence are documented in [RELEASING.md](https://github.com/saavo-dev/saavo-cli/blob/master/RELEASING.md).

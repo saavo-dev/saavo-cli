@@ -12,8 +12,8 @@ if (!semanticVersion.test(version)) {
 
 const packageJson = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
 const packageLock = JSON.parse(readFileSync(resolve(root, 'package-lock.json'), 'utf8'));
-if (packageJson.name !== 'saavo' || packageLock.name !== 'saavo') {
-  throw new Error('package.json and package-lock.json must both use the public name saavo.');
+if (packageJson.name !== 'saavo-cli' || packageLock.name !== 'saavo-cli') {
+  throw new Error('package.json and package-lock.json must both use the public name saavo-cli.');
 }
 if (packageJson.bin?.saavo !== 'dist/index.js') {
   throw new Error('package.json must publish the saavo executable from dist/index.js.');

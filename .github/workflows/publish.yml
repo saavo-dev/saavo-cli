@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   publish:
-    name: Publish saavo
+    name: Publish saavo-cli
     runs-on: ubuntu-latest
     env:
       SAAVO_OAUTH_CLIENT_ID: ${{ vars.SAAVO_OAUTH_CLIENT_ID }}
