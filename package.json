@@ -1,6 +1,6 @@
 {
   "name": "saavo-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official CLI for creating and managing Saavo projects",
   "type": "module",
   "bin": {
